@@ -860,7 +860,6 @@ class ApiController extends Controller
                 ->paginate(30);
 
             // $content = Memo::select(['experiences.id', 'experiences.title', 'experiences.description', 'experiences.image'])->where('experiences.title', 'like', '%' . $search . '%')->orderBy('experiences.recomended', 'ASC')->paginate(30);
-            $status = 'success';
         } else {
             // $s = DB::table('seen_memo')->select('memos')->where('user_id', '=', $user->id)->first();
             // $seen_list = 0;
@@ -881,7 +880,6 @@ class ApiController extends Controller
             //get recommended memo algo in default search
             // $content = DB::table('experiences')->selectRaw("id, title, description, image, recomended, IF(`mf_experiences`.`id` IN (" . $seen_list . "), '1', '0') as seen, IF (`mf_experiences`.`category_id` IN (" . $fav_cat . "), '1','0') as fav_cat, (SELECT COUNT(*) FROM `mf_post_ratings` WHERE `post_id` = `mf_experiences`.`id`) as global_rated, (SELECT count(*) FROM `mf_user_contact` WHERE `user_id` = " . $user->id . " AND `user_id` != `contact_user_id` AND `contact_user_id` IN (SELECT `user_id` FROM `mf_post_ratings` WHERE `post_id` = `mf_experiences`.`id`)) as contacts_rated ")->orderBy('seen', 'asc')->orderBy('fav_cat', 'desc')->orderBy('recomended', 'asc')->orderBy('title', 'asc')->orderBy('description', 'asc')->orderBy('priority_key', 'asc')->paginate(30);
             $content = [];
-            $status = 'failure';
         }
         if ($content) {
             foreach ($content as  $row) {
@@ -891,7 +889,7 @@ class ApiController extends Controller
         }
 
         return response()->json([
-            'result' => $status,
+            'result' => 'success',
             'message' => '',
             'content' => $content
         ], 200);

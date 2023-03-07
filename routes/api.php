@@ -36,6 +36,7 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('delete_profile_image', 'ApiController@delete_profile_image');
     Route::post('deleteUser', 'ApiController@deleteUser');
     Route::post('memo_list', 'ApiController@memo_list');
+    Route::post('memo_list_new', 'ApiController@memo_list_new');
     Route::post('memo_list_for_recapture', 'ApiController@memo_list_for_recapture');
     Route::post('memorate', 'ApiController@memorate');
     Route::post('time_line', 'ApiController@time_line');
@@ -75,7 +76,8 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('createPrimaryFolder', 'ApiController@createPrimaryFolder');
     Route::post('createSecondaryFolder', 'ApiController@createSecondaryFolder');
     Route::post('createSecondaryFolder', 'ApiController@createSecondaryFolder');
-        
+    Route::post('errorReport', 'ApiController@errorReport');
+
 
     Route::post('otherUserDetails', 'ApiController@otherUserDetails');
     Route::post('otherUserCategoryDetails', 'ApiController@otherUserCategoryDetails');
@@ -98,8 +100,15 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('like_minded', 'ApiController@likeMinded');
     Route::post('different_minded', 'ApiController@differentMinded');
     Route::post('darkModeToggle', 'ApiController@darkModeToggle');
+
+
+    Route::post('report_cats', 'ApiController@report_cats');
+    Route::post('report_post', 'ApiController@report_post');
+
+    Route::post('report_usr_cats', 'ApiController@report_usr_cats');
+    Route::post('report_usr_report', 'ApiController@report_usr_report');
+
     
+    Route::post('block_user', 'ApiController@block_user');
+    Route::post('blocked_user', 'ApiController@blocked_user');
 });
-
-
-

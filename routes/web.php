@@ -13,9 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('admin/login');
-});
+
+Route::get('/', 'ApiController@welcome');
+
+// Route::get('/', function () {
+//     return view('admin/login');
+// });
 
 
 
@@ -24,7 +27,7 @@ Route::resource('login','SessionController');
 
 Route::group(['middleware' => ['auth']], function () {
 
-Route::get('/', 'AdminController@index');
+// Route::get('/', 'AdminController@index');
 
 
 

@@ -227,15 +227,15 @@ class ApiController extends Controller
         if ($type == '1') {
             //for contacts
 
-            $users = DB::table('memo_user_rate_detail')->select(['user_id as id', 'name', 'image', 'rating', 'share_with'])->where('post_id', '=', $memo_id)->whereRaw('`user_id` IN (SELECT `contact_user_id` from `mf_user_contact` where `user_id` = "' . $user_id . '") AND `user_id` NOT IN (SELECT `blocked_user_id` FROM `mf_blocked_users` WHERE `user_id` = "' . $user_id . '" AND `status` = 1)')->where('share_with', '!=', 0)->whereIn('share_with', ['1', '3'])->orderBy('memo_user_rate_detail.updated_at', 'DESC')->take($limit)->get();
+            $users = DB::table('memo_user_rate_detail')->select(['user_id as id', 'name', 'image', 'rating', 'share_with'])->where('post_id', '=', $memo_id)->whereRaw('`user_id` IN (SELECT `contact_user_id` from `mf_user_contact` where `user_id` = "' . $user_id . '")')->where('share_with', '!=', 0)->whereIn('share_with', ['1', '3'])->orderBy('memo_user_rate_detail.updated_at', 'DESC')->take($limit)->get();
         } elseif ($type == '2') {
             //for closeones
 
-            $users = DB::table('memo_user_rate_detail')->select(['user_id as id', 'name', 'image', 'rating', 'share_with'])->where('post_id', '=', $memo_id)->whereRaw('(`share_with` IN (SELECT `group_id` FROM `mf_members_by_group` WHERE `created_by` = `mf_memo_user_rate_detail`.`user_id` AND `contact_user_id` =  "' . $user_id . '")) AND `user_id` NOT IN (SELECT `blocked_user_id` FROM `mf_blocked_users` WHERE `user_id` = "' . $user_id . '" AND `status` = 1)')->where('share_with', '!=', 0)->whereIn('share_with', ['2', '3'])->orderBy('memo_user_rate_detail.updated_at', 'DESC')->take($limit)->get();
+            $users = DB::table('memo_user_rate_detail')->select(['user_id as id', 'name', 'image', 'rating', 'share_with'])->where('post_id', '=', $memo_id)->whereRaw('(`share_with` IN (SELECT `group_id` FROM `mf_members_by_group` WHERE `created_by` = `mf_memo_user_rate_detail`.`user_id` AND `contact_user_id` =  "' . $user_id . '"))')->where('share_with', '!=', 0)->whereIn('share_with', ['2', '3'])->orderBy('memo_user_rate_detail.updated_at', 'DESC')->take($limit)->get();
         } elseif ($type == '3') {
             //for public
 
-            $users = DB::table('memo_user_rate_detail')->select(['user_id as id', 'name', 'image', 'rating', 'share_with'])->where('post_id', '=', $memo_id)->whereRaw('((`share_with` = 3) OR (`share_with` = 1 AND `user_id` IN (SELECT `contact_user_id` from `mf_user_contact` where `user_id` = "' . $user_id . '")) OR (`share_with` IN (SELECT `group_id` FROM `mf_members_by_group` WHERE `created_by` = `mf_memo_user_rate_detail`.`user_id` AND `contact_user_id` =  "' . $user_id . '")) OR (`share_with` = 0 AND `user_id` = "' . $user_id . '") )  AND `user_id` NOT IN (SELECT `blocked_user_id` FROM `mf_blocked_users` WHERE `user_id` = "' . $user_id . '" AND `status` = 1)')->orderBy('memo_user_rate_detail.updated_at', 'DESC')->take($limit)->get();
+            $users = DB::table('memo_user_rate_detail')->select(['user_id as id', 'name', 'image', 'rating', 'share_with'])->where('post_id', '=', $memo_id)->whereRaw('((`share_with` = 3) OR (`share_with` = 1 AND `user_id` IN (SELECT `contact_user_id` from `mf_user_contact` where `user_id` = "' . $user_id . '")) OR (`share_with` IN (SELECT `group_id` FROM `mf_members_by_group` WHERE `created_by` = `mf_memo_user_rate_detail`.`user_id` AND `contact_user_id` =  "' . $user_id . '")) OR (`share_with` = 0 AND `user_id` = "' . $user_id . '") )')->orderBy('memo_user_rate_detail.updated_at', 'DESC')->take($limit)->get();
         }
 
         return $users;
@@ -860,7 +860,6 @@ class ApiController extends Controller
                 ->paginate(30);
 
             // $content = Memo::select(['experiences.id', 'experiences.title', 'experiences.description', 'experiences.image'])->where('experiences.title', 'like', '%' . $search . '%')->orderBy('experiences.recomended', 'ASC')->paginate(30);
-            $status = 'success';
         } else {
             // $s = DB::table('seen_memo')->select('memos')->where('user_id', '=', $user->id)->first();
             // $seen_list = 0;
@@ -881,7 +880,6 @@ class ApiController extends Controller
             //get recommended memo algo in default search
             // $content = DB::table('experiences')->selectRaw("id, title, description, image, recomended, IF(`mf_experiences`.`id` IN (" . $seen_list . "), '1', '0') as seen, IF (`mf_experiences`.`category_id` IN (" . $fav_cat . "), '1','0') as fav_cat, (SELECT COUNT(*) FROM `mf_post_ratings` WHERE `post_id` = `mf_experiences`.`id`) as global_rated, (SELECT count(*) FROM `mf_user_contact` WHERE `user_id` = " . $user->id . " AND `user_id` != `contact_user_id` AND `contact_user_id` IN (SELECT `user_id` FROM `mf_post_ratings` WHERE `post_id` = `mf_experiences`.`id`)) as contacts_rated ")->orderBy('seen', 'asc')->orderBy('fav_cat', 'desc')->orderBy('recomended', 'asc')->orderBy('title', 'asc')->orderBy('description', 'asc')->orderBy('priority_key', 'asc')->paginate(30);
             $content = [];
-            $status = 'failure';
         }
         if ($content) {
             foreach ($content as  $row) {
@@ -891,7 +889,7 @@ class ApiController extends Controller
         }
 
         return response()->json([
-            'result' => $status,
+            'result' => 'success',
             'message' => '',
             'content' => $content
         ], 200);
@@ -1045,9 +1043,7 @@ class ApiController extends Controller
 
             //gallery images
 
-            $gallery_data = PostImage::select(['posts.user_id', 'post_images.image'])->join('posts', 'post_images.post_id', '=', 'posts.id')->where(['posts.exp_id' => $row->id])->whereIn('posts.share_with', [3])
-            ->whereRaw('`mf_posts`.`user_id` NOT IN (SELECT `blocked_user_id` FROM `mf_blocked_users` WHERE `mf_blocked_users`.`user_id` = ' . $user->id . ' AND `status` = 1)')
-            ->orderBy('post_images.updated_at', 'DESC')->take(8)->get();
+            $gallery_data = PostImage::select(['post_images.image'])->join('posts', 'post_images.post_id', '=', 'posts.id')->where(['posts.exp_id' => $row->id])->whereIn('posts.share_with', [3])->orderBy('post_images.updated_at', 'DESC')->take(8)->get();
 
             foreach ($gallery_data as $key => $value) {
                 $value->image = $this->getImageUrl($value->image);
@@ -3136,9 +3132,7 @@ class ApiController extends Controller
         }
 
 
-        $content = MasterContact::select(['master_contacts.id', 'master_contacts.name', 'master_contacts.number', 'users.id as uid'])->leftjoin('users', DB::raw('CONCAT_WS("",mf_users.country_code,mf_users.phone)'), '=', 'master_contacts.number')->where(['user_id' => $user->id])
-        ->whereRaw('`mf_users`.`id` NOT IN (SELECT `blocked_user_id` FROM `mf_blocked_users` WHERE `mf_blocked_users`.`user_id` = ' . $user->id . ' AND `status` = 1)')
-        ->orderByRaw('-uid DESC')->orderBy('master_contacts.name', 'ASC')->get();
+        $content = MasterContact::select(['master_contacts.id', 'master_contacts.name', 'master_contacts.number', 'users.id as uid'])->leftjoin('users', DB::raw('CONCAT_WS("",mf_users.country_code,mf_users.phone)'), '=', 'master_contacts.number')->where(['user_id' => $user->id])->orderByRaw('-uid DESC')->orderBy('master_contacts.name', 'ASC')->get();
         foreach ($content as $key => $value) {
             $value->memo_user = false;
             if (!empty($value->uid)) {
@@ -3240,11 +3234,7 @@ class ApiController extends Controller
         }
 
 
-        $content = MasterContact::select(['master_contacts.id', 'master_contacts.name', 'master_contacts.number', 'users.id as uid'])->leftjoin('users', DB::raw('CONCAT_WS("",mf_users.country_code,mf_users.phone)'), '=', 'master_contacts.number')
-        ->where(['user_id' => $user->id])
-        ->whereNotNull('users.id')
-        ->whereRaw('`mf_users`.`id` NOT IN (SELECT `blocked_user_id` FROM `mf_blocked_users` WHERE `mf_blocked_users`.`user_id` = ' . $user->id . ' AND `status` = 1)')
-        ->orderByRaw('-uid DESC')->orderBy('master_contacts.name', 'ASC')->get();
+        $content = MasterContact::select(['master_contacts.id', 'master_contacts.name', 'master_contacts.number', 'users.id as uid'])->leftjoin('users', DB::raw('CONCAT_WS("",mf_users.country_code,mf_users.phone)'), '=', 'master_contacts.number')->where(['user_id' => $user->id])->whereNotNull('users.id')->orderByRaw('-uid DESC')->orderBy('master_contacts.name', 'ASC')->get();
         foreach ($content as $key => $value) {
             $value->memo_user = true;
             $total_rated_memo = PostRating::where(['user_id' => $value->uid])->count();
@@ -4048,7 +4038,7 @@ class ApiController extends Controller
         $memo_id = $request->memo_id;
         //apply logic 
 
-        $related_post = PostDetail::whereRaw('FIND_IN_SET(' . $memo_id . ',exp_id) AND `user_id` NOT IN (SELECT `blocked_user_id` FROM `mf_blocked_users` WHERE `user_id` = "' . $user->id . '" AND `status` = 1)')
+        $related_post = PostDetail::whereRaw('FIND_IN_SET(?,exp_id)', $memo_id)
             // ->where(['share_with' => '1,2,3'])
             ->paginate(20);
 
